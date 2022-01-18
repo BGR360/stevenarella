@@ -79,7 +79,7 @@ macro_rules! state_packets {
         use crate::protocol::*;
         use std::io;
 
-        #[derive(Debug)]
+        #[derive(Debug, Clone, PartialEq)]
         pub enum Packet {
         $(
             $(
@@ -137,7 +137,7 @@ macro_rules! state_packets {
                 }
 
                 $(
-                    #[derive(Default, Debug)]
+                    #[derive(Default, Debug, Clone, PartialEq)]
                     $(#[$attr])* pub struct $name {
                         $($(#[$fattr])* pub $field: $field_type),+,
                     }
@@ -448,7 +448,7 @@ impl Serializable for f64 {
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
 pub struct UUID(u64, u64);
 
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct UUIDParseError;
 impl std::error::Error for UUIDParseError {}
 
@@ -499,6 +499,7 @@ impl Serializable for UUID {
     }
 }
 
+#[derive(Clone, PartialEq, Eq)]
 pub struct Biomes3D {
     pub data: [i32; 1024],
 }
@@ -541,6 +542,7 @@ pub trait Lengthable: Serializable + Copy + Default {
     fn from_len(_: usize) -> Self;
 }
 
+#[derive(Clone, PartialEq, Eq)]
 pub struct LenPrefixed<L: Lengthable, V> {
     len: L,
     pub data: Vec<V>,
@@ -596,6 +598,7 @@ impl<L: Lengthable, V: fmt::Debug> fmt::Debug for LenPrefixed<L, V> {
 }
 
 // Optimization
+#[derive(Clone, PartialEq, Eq)]
 pub struct LenPrefixedBytes<L: Lengthable> {
     len: L,
     pub data: Vec<u8>,
@@ -692,7 +695,7 @@ impl Lengthable for i32 {
 use num_traits::cast::{cast, NumCast};
 /// `FixedPoint5` has the 5 least-significant bits for the fractional
 /// part, upper for integer part: https://wiki.vg/Data_types#Fixed-point_numbers
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct FixedPoint5<T>(T);
 
 impl<T: Serializable> Serializable for FixedPoint5<T> {
@@ -738,7 +741,7 @@ where
 }
 
 /// `FixedPoint12` is like `FixedPoint5` but the fractional part is 12-bit
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct FixedPoint12<T>(T);
 
 impl<T: Serializable> Serializable for FixedPoint12<T> {
@@ -785,7 +788,7 @@ where
 
 /// `VarInt` have a variable size (between 1 and 5 bytes) when encoded based
 /// on the size of the number
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub struct VarInt(pub i32);
 
 impl Lengthable for VarInt {
@@ -848,7 +851,7 @@ impl fmt::Debug for VarInt {
 
 /// `VarShort` have a variable size (2 or 3 bytes) and are backwards-compatible
 /// with vanilla shorts, used for Forge custom payloads
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct VarShort(pub i32);
 
 impl Lengthable for VarShort {
@@ -911,7 +914,7 @@ impl fmt::Debug for VarShort {
 
 /// `VarLong` have a variable size (between 1 and 10 bytes) when encoded based
 /// on the size of the number
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct VarLong(pub i64);
 
 impl Lengthable for VarLong {
@@ -993,7 +996,7 @@ impl Serializable for Position {
 
 /// Direction is used to define whether packets are going to the
 /// server or the client.
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Direction {
     Serverbound,
     Clientbound,
@@ -1466,7 +1469,7 @@ pub fn try_parse_packet(ibuf: Vec<u8>, protocol_version: i32) {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Status {
     pub version: StatusVersion,
     pub players: StatusPlayers,
@@ -1476,20 +1479,20 @@ pub struct Status {
     pub fml_network_version: Option<i64>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct StatusVersion {
     pub name: String,
     pub protocol: i32,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct StatusPlayers {
     pub max: i32,
     pub online: i32,
     pub sample: Vec<StatusPlayer>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct StatusPlayer {
     name: String,
     id: String,
